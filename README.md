@@ -1,5 +1,5 @@
-# cAPI
-cAPI - Capitalization API
+# cAPIta
+cAPIta - Capitalization API
 
 ## Routes
 **Capitalize:** /:*capType*/:*string*.:*extension*
@@ -33,4 +33,4 @@ cAPI - Capitalization API
 + *capType*: must be valid capType (see list above, excludes spell)
 + *string*: must be valid string (limit 50 characters)
 + extension: not required (returns svg)
-+ example: ![cAPI Badge](https://img.shields.io/badge/cAPI%20UPPER-HELLO%20WORLD-b5d4ff.svg)
++ example: ![cAPIta Badge](https://img.shields.io/badge/cAPIta%20UPPER-HELLO%20WORLD-b5d4ff.svg)
