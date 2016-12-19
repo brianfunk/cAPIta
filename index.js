@@ -80,8 +80,9 @@ app.get('/badge/:cap/:string', function(req,res) {
         return;
     }
     
-    var badge_url = 'https://img.shields.io/badge/cAPI-'+ encodeURIComponent(cs) +'-b5d4ff.svg';
-	//console.log('badge_url : ' + badge_url );
+    var badge_url = 'https://img.shields.io/badge/cAPI%20'+ capstring(cap, cap) +'-'+ encodeURIComponent(cs) +'-b5d4ff.svg';
+	console.log('badge_url : ' + badge_url );
+    
 	request(badge_url).pipe(res);
 });
 
