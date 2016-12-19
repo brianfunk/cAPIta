@@ -15,7 +15,6 @@
 
 require('dotenv').config();
 
-var numberstring = require('numberstring');
 var capstring = require('capstring');
 var async = require('async');
 var express = require('express');
