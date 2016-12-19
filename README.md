@@ -1,2 +1,2 @@
 # capi
-CapAPI
+cAPI - Capitalization API
