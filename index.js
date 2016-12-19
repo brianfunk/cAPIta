@@ -38,6 +38,7 @@ var cases = [
     'upper',
     'lower',
     'leet',
+    'reverse',
     'camel',
     'pascal',
     'snake',

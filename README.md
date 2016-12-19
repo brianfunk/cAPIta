@@ -12,13 +12,14 @@ cAPIta - Capitalization API
  + sentence
  + upper
  + lower
- + leet
  + camel
  + pascal
  + snake
  + python
  + crazy
  + random
+ + leet
+ + reverse
  + spell
 + *string*: must be valid string
 + *extension*: must be valid extension
