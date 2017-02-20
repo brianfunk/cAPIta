@@ -1,11 +1,10 @@
 /*
-             _       _______  _____  
-            / \     |_   __ \|_   _| 
- .---.     / _ \      | |__) | | |   
-/ /'`\]   / ___ \     |  ___/  | |   
-| \__.  _/ /   \ \_  _| |_    _| |_  
-'.___.'|____| |____||_____|  |_____| 
-                                     
+          _    ____ ___ _        
+   ___   / \  |  _ \_ _| |_ __ _ 
+  / __| / _ \ | |_) | || __/ _` |
+ | (__ / ___ \|  __/| || || (_| |
+  \___/_/   \_\_|  |___|\__\__,_|
+                                                                      
 */
 
 //*******************************************************************
@@ -16,7 +15,6 @@
 
 require('dotenv').config();
 
-var numberstring = require('numberstring');
 var capstring = require('capstring');
 var async = require('async');
 var express = require('express');
@@ -39,6 +37,7 @@ var cases = [
     'upper',
     'lower',
     'leet',
+    'reverse',
     'camel',
     'pascal',
     'snake',
@@ -60,7 +59,7 @@ var app = express();
 //app.use(express.static('public'));
  
 app.get('/', function (req, res) {
-	res.send('cAPI');
+	res.send('cAPIta');
 });
 
 //*******************************************************************
@@ -80,7 +79,7 @@ app.get('/badge/:cap/:string', function(req,res) {
         return;
     }
     
-    var badge_url = 'https://img.shields.io/badge/cAPI%20'+ capstring(cap, cap) +'-'+ encodeURIComponent(cs) +'-b5d4ff.svg';
+    var badge_url = 'https://img.shields.io/badge/cAPIta%20'+ capstring(cap, cap) +'-'+ encodeURIComponent(cs) +'-b5d4ff.svg';
 	console.log('badge_url : ' + badge_url );
     
 	request(badge_url).pipe(res);
