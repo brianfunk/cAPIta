@@ -138,18 +138,20 @@ const outResponse = (req, res, input, output, cap, ext) => {
         res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<result>\n  <input>${escapeHtml(input)}</input>\n  <output>${safeOutput}</output>\n  <cap>${cap}</cap>\n</result>`);
         break;
       case 'yaml':
-      case 'yml':
+      case 'yml': {
         res.type('text/yaml');
         // YAML escape: handle quotes, newlines, special chars
         const yamlEscape = (s) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r');
         res.send(`input: "${yamlEscape(input)}"\noutput: "${yamlEscape(output)}"\ncap: "${cap}"`);
         break;
-      case 'csv':
+      }
+      case 'csv': {
         res.type('text/csv');
         // CSV escape: double quotes and handle newlines (wrap in quotes)
         const csvEscape = (s) => s.replace(/"/g, '""').replace(/[\r\n]/g, ' ');
         res.send(`input,output,cap\n"${csvEscape(input)}","${csvEscape(output)}","${cap}"`);
         break;
+      }
     }
   } else {
     res.format({

@@ -1,6 +1,6 @@
 {
   "name": "capita",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "cAPIta - Capitalization API powered by capstring",
   "type": "module",
   "main": "index.js",
@@ -48,7 +48,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "capstring": "file:../capstring",
+    "capstring": "github:brianfunk/capstring#dev",
     "dictionary-en": "^4.0.0",
     "dotenv": "^16.4.0",
     "express": "^4.21.0",
