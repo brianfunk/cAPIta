@@ -1,6 +1,6 @@
 {
   "name": "capita",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "cAPIta - Capitalization API powered by capstring",
   "type": "module",
   "main": "index.js",
