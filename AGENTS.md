@@ -2,7 +2,7 @@
 
 ## Overview
 
-`cAPIta` is a REST API for text capitalization and transformation. Powered by capstring, it provides 24 different capitalization styles, spell checking, and multiple output formats.
+`cAPIta` is a REST API for text capitalization and transformation. Powered by capstring, it provides 29 different capitalization styles, spell checking, and multiple output formats.
 
 ## API Endpoints
 
@@ -12,10 +12,11 @@ GET /:style/:string          # With content negotiation
 GET /:style/:string.:ext     # With explicit format
 ```
 
-**Styles (24 total):**
+**Styles (29 total):**
 - Case: `upper`, `lower`, `title`, `sentence`, `proper`, `swap`
-- Code: `camel`, `pascal`, `snake`, `kebab`, `slug`, `constant`, `python`, `dot`, `path`
+- Code: `camel`, `pascal`, `snake`, `kebab`, `slug`, `constant`, `python`, `dot`, `path`, `train`
 - Fun: `leet`, `reverse`, `sponge`, `mock`, `alternate`, `crazy`, `random`
+- New: `hashtag`, `acronym`, `rot13`, `flip`
 - Utility: `same`, `none`
 
 **Extensions:** `json`, `jsonp`, `html`, `txt`, `xml`, `yaml`, `yml`, `csv`
@@ -67,7 +68,7 @@ app.listen(3000);
 - Spell checking uses nspell (Hunspell-compatible), no API key needed
 - Default port is 4321, configurable via `PORT` env var
 - ESM-only package
-- All 24 styles come from the capstring library
+- All 29 styles come from the capstring library
 
 ## Testing
 

@@ -44,7 +44,7 @@ index.js
 
 ## Key Dependencies
 
-- **capstring** - Core text transformation library (24 styles)
+- **capstring** - Core text transformation library (29 styles)
 - **nspell** - Spell checking (no API key needed)
 - **dictionary-en** - English dictionary for nspell
 - **express** - Web framework
