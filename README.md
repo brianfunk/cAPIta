@@ -1,6 +1,8 @@
+> **Archived (October 2026).** cAPIta has been folded into [capstring](https://github.com/brianfunk/capstring).
+> Website: **https://capstring.netlify.app** · API: **https://capstring.netlify.app/api**
+> `https://capita-api.netlify.app` now redirects there. Every endpoint lives on under `/api/` (transform, all, chain, batch, badge, lorem, spell).
+
 [![cAPIta](https://img.shields.io/badge/cAPIta-CaPiTaLiZaTiOn%20API-b5d4ff.svg)](https://github.com/brianfunk/cAPIta)
-[![npm version](https://img.shields.io/npm/v/@brianfunk/capita.svg)](https://www.npmjs.com/package/@brianfunk/capita)
-[![npm downloads](https://img.shields.io/npm/dm/@brianfunk/capita.svg)](https://www.npmjs.com/package/@brianfunk/capita)
 [![Netlify](https://img.shields.io/badge/live-capita-api.netlify.app-b5d4ff.svg)](https://capita-api.netlify.app)
 [![CI](https://github.com/brianfunk/cAPIta/actions/workflows/ci.yml/badge.svg)](https://github.com/brianfunk/cAPIta/actions/workflows/ci.yml)
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badge/)

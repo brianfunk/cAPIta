@@ -1,3 +1,5 @@
+> **This project is archived.** All work continues in the capstring repo (website + API under `netlify/`). Do not add features here.
+
 # Claude Code Instructions for cAPIta
 
 ## Project Context
