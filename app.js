@@ -26,6 +26,9 @@ const PUBLIC_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'publ
 /** Maximum input length to prevent abuse */
 const MAX_INPUT_LENGTH = 10000;
 
+/** Styles whose output changes on every call, so responses must not be cached */
+const NONDETERMINISTIC = Object.freeze(['crazy', 'random']);
+
 /** Supported output formats */
 const EXTS = Object.freeze(['json', 'jsonp', 'html', 'txt', 'xml', 'yaml', 'yml', 'csv']);
 
@@ -57,6 +60,21 @@ const escapeHtml = (str) => {
     "'": '&#39;'
   };
   return str.replace(/[&<>"']/g, (char) => htmlEscapes[char]);
+};
+
+/**
+ * Mark a response as publicly cacheable (browser 1h, Netlify CDN 1 day)
+ * unless any of the given styles is nondeterministic.
+ * @param {Object} res - Express response
+ * @param {string[]} [styles] - Styles used to produce the response
+ */
+const setCache = (res, styles = []) => {
+  if (styles.some((s) => NONDETERMINISTIC.includes(s))) {
+    res.set('Cache-Control', 'no-store');
+    return;
+  }
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.set('Netlify-CDN-Cache-Control', 'public, max-age=86400');
 };
 
 /**
@@ -203,11 +221,24 @@ export const createApp = () => {
 
   app.use(express.json());
 
+  // Open CORS so the API is usable from any site's JavaScript
+  app.use((req, res, next) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(204);
+      return;
+    }
+    next();
+  });
+
   // Playground (public/index.html) and any other static assets
   app.use(express.static(PUBLIC_DIR));
 
   // List available styles
   app.get('/styles', (_req, res) => {
+    setCache(res);
     res.json({
       styles: STYLES,
       count: STYLES.length
@@ -229,6 +260,7 @@ export const createApp = () => {
     }
 
     const cs = capstring(string, cap);
+    setCache(res, [cap]);
     res.type('image/svg+xml');
     res.send(badgeSvg(`cAPIta ${capstring(cap, cap)}`, cs));
   });
@@ -246,6 +278,7 @@ export const createApp = () => {
     const chars = string.length;
     const charsNoSpaces = string.replace(/\s/g, '').length;
 
+    setCache(res);
     const result = {
       input: string,
       words: words.length,
@@ -287,6 +320,7 @@ export const createApp = () => {
     words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
 
     const lorem = words.join(' ') + '.';
+    setCache(res);
 
     if (ext === 'json' || !ext) {
       res.json({ lorem, wordCount: count });
@@ -365,6 +399,7 @@ export const createApp = () => {
       }
     }
 
+    setCache(res, styleList);
     outResponse(req, res, string, result, styleList.join('+'), ext || false);
   });
 
@@ -374,6 +409,7 @@ export const createApp = () => {
 
     try {
       const cs = spellCheckText(string);
+      setCache(res);
       outResponse(req, res, string, cs, 'spell', ext);
     } catch {
       res.status(500).send('error - spell check failed');
@@ -386,6 +422,7 @@ export const createApp = () => {
 
     try {
       const cs = spellCheckText(string);
+      setCache(res);
       outResponse(req, res, string, cs, 'spell', false);
     } catch {
       res.status(500).send('error - spell check failed');
@@ -412,6 +449,7 @@ export const createApp = () => {
       return;
     }
 
+    setCache(res, [cap]);
     outResponse(req, res, string, cs, cap, ext);
   });
 
@@ -435,6 +473,7 @@ export const createApp = () => {
       return;
     }
 
+    setCache(res, [cap]);
     outResponse(req, res, string, cs, cap, false);
   });
 

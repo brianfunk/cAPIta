@@ -38,6 +38,9 @@ const toEvent = async (request) => {
 
 export default async (request) => {
   const result = await handler(await toEvent(request), {});
-  const body = result.isBase64Encoded ? Buffer.from(result.body, 'base64') : result.body;
-  return new Response(body, { status: result.statusCode, headers: result.headers });
+  const status = result.statusCode;
+  // Response() rejects a body on 1xx/204/205/304
+  const bodiless = status < 200 || status === 204 || status === 205 || status === 304;
+  const body = bodiless ? null : result.isBase64Encoded ? Buffer.from(result.body, 'base64') : result.body;
+  return new Response(body, { status, headers: result.headers });
 };

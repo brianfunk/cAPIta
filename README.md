@@ -34,6 +34,8 @@ A blazing-fast REST API for text transformation. Convert any string to 29 differ
 - **Lorem ipsum generator** - Generate placeholder text
 - **XSS-safe HTML output** - Security built in
 - **Content negotiation** - Automatic format based on Accept header
+- **CORS enabled** - Call it from any web page
+- **Cacheable** - Deterministic responses carry public cache headers
 
 ## Quick Start
 

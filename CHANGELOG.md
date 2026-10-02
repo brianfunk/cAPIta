@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Live site** at https://capita-api.netlify.app with a playground at `/` that transforms as you type
 - Netlify deployment (`netlify.toml`, `netlify/functions/api.mjs`) and `npm run dev`
 - `npx @brianfunk/capita` runs the server (new `bin` entry)
+- CORS headers on every response, so the API works from any site's JavaScript
+- Cache headers on deterministic GET responses (`crazy` and `random` are never cached)
+- Playground keeps the phrase and style in the page URL so links are shareable, and has an output format picker
 
 ### Changed
 

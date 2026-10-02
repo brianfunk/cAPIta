@@ -83,6 +83,17 @@
     word-break: break-all;
   }
   .curl a { color: var(--fg); text-decoration: none; border-bottom: 1px dotted var(--muted); }
+  .curl select {
+    font: inherit;
+    font-size: 12px;
+    color: var(--fg);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 2px 6px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
   .curl a:hover { border-bottom-style: solid; }
   h2 {
     font-size: 13px;
@@ -159,13 +170,13 @@
   / __| / _ \ | |_) | || __/ _` |
  | (__ / ___ \|  __/| || || (_| |
   \___/_/   \_\_|  |___|\__\__,_|</pre>
-  <p class="tag">A tiny REST API that capitalizes strings 29 ways. Type something, click a card to copy, or just hit the URL. Powered by <a href="https://github.com/brianfunk/capstring">capstring</a>.</p>
+  <p class="tag">A tiny REST API that capitalizes strings 29 ways. Type something, click a card to copy, or just hit the URL. The page link carries your phrase, so share it. Powered by <a href="https://github.com/brianfunk/capstring">capstring</a>.</p>
 
   <div class="input">
     <input id="text" type="text" value="hello world" placeholder="type a phrase" autocomplete="off" autofocus>
     <button id="spell" type="button" title="Run the input through the spell checker">spell check</button>
   </div>
-  <div class="curl" id="curl"></div>
+  <div class="curl"><span id="curl"></span><select id="ext" aria-label="Output format"><option>json</option><option>txt</option><option>html</option><option>xml</option><option>yaml</option><option>csv</option><option>jsonp</option></select></div>
 
   <div id="groups"></div>
 
@@ -196,6 +207,7 @@
   const input = document.getElementById('text');
   const groupsEl = document.getElementById('groups');
   const curlEl = document.getElementById('curl');
+  const extEl = document.getElementById('ext');
   const toast = document.getElementById('toast');
   const cards = {};
   let selected = 'title';
@@ -239,10 +251,30 @@
 
   const encode = (s) => encodeURIComponent(s);
 
+  const readHash = () => {
+    try {
+      const raw = location.hash.slice(1);
+      if (!raw) return null;
+      const [text, style] = raw.split('|').map((v) => decodeURIComponent(v));
+      return { text, style };
+    } catch {
+      return null;
+    }
+  };
+
+  const writeHash = () => {
+    const text = input.value;
+    const hash = text ? `#${encode(text)}|${selected}` : '';
+    history.replaceState(null, '', `${location.pathname}${hash}`);
+  };
+
   const updateCurl = () => {
     const text = input.value;
-    const url = `${base}/${selected}/${encode(text)}.json`;
+    const ext = extEl.value;
+    const query = ext === 'jsonp' ? '?callback=cb' : '';
+    const url = `${base}/${selected}/${encode(text)}.${ext}${query}`;
     curlEl.innerHTML = `curl <a href="${url}" target="_blank" rel="noopener">${url}</a>`;
+    writeHash();
   };
 
   const select = async (style, copy) => {
@@ -287,6 +319,8 @@
     timer = setTimeout(transform, 180);
   });
 
+  extEl.addEventListener('change', updateCurl);
+
   document.getElementById('spell').addEventListener('click', async () => {
     const text = input.value.trim();
     if (!text) return;
@@ -305,10 +339,19 @@
     }
   });
 
+  const fromHash = readHash();
+  if (fromHash?.text) input.value = fromHash.text;
+
+  const start = (styles) => {
+    if (fromHash?.style && styles.includes(fromHash.style)) selected = fromHash.style;
+    buildCards(styles);
+    transform();
+  };
+
   fetch(`${base}/styles`)
     .then((r) => r.json())
-    .then((d) => { buildCards(d.styles); transform(); })
-    .catch(() => { buildCards(Object.values(GROUPS).flat()); transform(); });
+    .then((d) => start(d.styles))
+    .catch(() => start(Object.values(GROUPS).flat()));
 })();
 </script>
 </body>

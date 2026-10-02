@@ -592,6 +592,54 @@ describe('Chain endpoint', () => {
   });
 });
 
+describe('CORS', () => {
+  it('allows any origin on GET', async () => {
+    const res = await request(app).get('/upper/hello.json');
+    expect(res.headers['access-control-allow-origin']).toBe('*');
+  });
+
+  it('answers preflight for POST /batch', async () => {
+    const res = await request(app)
+      .options('/batch')
+      .set('Origin', 'https://example.com')
+      .set('Access-Control-Request-Method', 'POST');
+    expect(res.status).toBe(204);
+    expect(res.headers['access-control-allow-methods']).toContain('POST');
+    expect(res.headers['access-control-allow-headers']).toContain('Content-Type');
+  });
+});
+
+describe('Caching', () => {
+  it('marks deterministic transforms as publicly cacheable', async () => {
+    const res = await request(app).get('/kebab/hello%20world.json');
+    expect(res.headers['cache-control']).toContain('public');
+    expect(res.headers['netlify-cdn-cache-control']).toContain('public');
+  });
+
+  it('does not cache random styles', async () => {
+    const res = await request(app).get('/random/hello.json');
+    expect(res.headers['cache-control']).toBe('no-store');
+    expect(res.headers['netlify-cdn-cache-control']).toBeUndefined();
+  });
+
+  it('does not cache chains containing a random style', async () => {
+    const res = await request(app).get('/chain/upper+crazy/hello.json');
+    expect(res.headers['cache-control']).toBe('no-store');
+  });
+
+  it('caches styles, badges, count, lorem and spell', async () => {
+    for (const path of ['/styles', '/badge/upper/hi', '/count/hi', '/lorem/3', '/spell/helo.json']) {
+      const res = await request(app).get(path);
+      expect(res.headers['cache-control'], path).toContain('public');
+    }
+  });
+
+  it('does not cache POST /batch', async () => {
+    const res = await request(app).post('/batch').send({ inputs: ['a'], style: 'upper' });
+    expect(res.headers['cache-control']).toBeUndefined();
+  });
+});
+
 describe('Input validation', () => {
   it('returns 400 for input too long', async () => {
     const longInput = 'a'.repeat(10001);
