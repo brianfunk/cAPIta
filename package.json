@@ -1,9 +1,17 @@
 {
-  "name": "capita",
-  "version": "1.0.1",
-  "description": "cAPIta - Capitalization API powered by capstring",
+  "name": "@brianfunk/capita",
+  "version": "1.1.0",
+  "description": "cAPIta - Capitalization API powered by capstring. 29 styles, one URL.",
   "type": "module",
   "main": "index.js",
+  "bin": {
+    "capita": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "app.js",
+    "public"
+  ],
   "exports": {
     ".": {
       "import": "./index.js"
@@ -16,7 +24,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint . --format stylish",
-    "lint:report": "eslint . --format html -o coverage/lint-report.html"
+    "lint:report": "eslint . --format html -o coverage/lint-report.html",
+    "dev": "netlify dev"
   },
   "repository": {
     "type": "git",
@@ -43,7 +52,10 @@
   "bugs": {
     "url": "https://github.com/brianfunk/cAPIta/issues"
   },
-  "homepage": "https://github.com/brianfunk/cAPIta#readme",
+  "homepage": "https://capita-api.netlify.app",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
@@ -52,7 +64,8 @@
     "dictionary-en": "^4.0.0",
     "dotenv": "^16.4.0",
     "express": "^4.21.0",
-    "nspell": "^2.1.0"
+    "nspell": "^2.1.0",
+    "serverless-http": "^4.0.0"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.18",

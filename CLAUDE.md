@@ -9,6 +9,7 @@ cAPIta is a REST API for text transformation and capitalization. It wraps the `c
 ```bash
 npm install           # Install dependencies
 npm start             # Start the server (port 4321)
+npm run dev           # Netlify Dev: static playground + function (port 8888)
 npm run demo          # Run interactive demo
 npm test              # Run Vitest tests
 npm run lint          # Run ESLint
@@ -26,21 +27,24 @@ npm run test:coverage # Run tests with coverage
 ## Architecture
 
 ```
-index.js
-├── Imports (capstring, nspell, express)
-├── Spell checker initialization
+app.js                      - Express app factory (imported by tests, server, Netlify)
 ├── Helper functions
 │   ├── escapeHtml() - XSS prevention
-│   ├── spellCheckText() - Spell correction
+│   ├── badgeSvg() - Local shields-style SVG
+│   ├── spellCheckText() - Spell correction (nspell, lazy init)
 │   └── outResponse() - Format output by type
-├── createApp() - Express app factory
-│   ├── GET / - Root route
-│   ├── GET /styles - List all styles
-│   ├── GET /badge/:cap/:string - SVG badges
-│   ├── GET /spell/:string - Spell check
-│   └── GET /:cap/:string - Main transform
-└── Server startup
+└── createApp()
+    ├── static public/ - Playground at GET /
+    ├── GET /styles, /badge/:cap/:string, /count, /lorem, /chain, /spell
+    ├── POST /batch
+    └── GET /:cap/:string(.ext) - Main transform
+index.js                    - Server entry / npx bin (app.listen on PORT)
+public/index.html           - Static playground, no build step
+netlify/functions/api.mjs   - Netlify Function wrapping createApp()
+netlify.toml                - publish=public, /* -> function, dictionary-en shipped whole
 ```
+
+Live at https://capita-api.netlify.app (Netlify team: Brian Funk). `npm run dev` runs Netlify Dev locally.
 
 ## Key Dependencies
 

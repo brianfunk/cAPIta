@@ -1,0 +1,31 @@
+# cAPIta on Netlify (team: Brian Funk)
+# Static playground from public/, every other path hits the Express function.
+
+[build]
+  publish = "public"
+  command = "echo 'no build step'"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[dev]
+  port = 8888
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  # dictionary-en reads its .aff/.dic files by path at runtime, so ship it whole.
+  external_node_modules = ["dictionary-en"]
+  included_files = ["node_modules/dictionary-en/**"]
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"

@@ -11,7 +11,9 @@ export default [
         process: 'readonly',
         Buffer: 'readonly',
         fetch: 'readonly',
-        AbortController: 'readonly',
+        Request: 'readonly',
+        Response: 'readonly',
+        URL: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly'
       }
@@ -23,6 +25,6 @@ export default [
     }
   },
   {
-    ignores: ['node_modules/', 'coverage/']
+    ignores: ['node_modules/', 'coverage/', '.netlify/', 'public/']
   }
 ];
