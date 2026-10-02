@@ -1,6 +1,7 @@
 [![cAPIta](https://img.shields.io/badge/cAPIta-CaPiTaLiZaTiOn%20API-b5d4ff.svg)](https://github.com/brianfunk/cAPIta)
-[![npm version](https://img.shields.io/npm/v/capita.svg)](https://www.npmjs.com/package/capita)
-[![npm downloads](https://img.shields.io/npm/dm/capita.svg)](https://www.npmjs.com/package/capita)
+[![npm version](https://img.shields.io/npm/v/@brianfunk/capita.svg)](https://www.npmjs.com/package/@brianfunk/capita)
+[![npm downloads](https://img.shields.io/npm/dm/@brianfunk/capita.svg)](https://www.npmjs.com/package/@brianfunk/capita)
+[![Netlify](https://img.shields.io/badge/live-capita-api.netlify.app-b5d4ff.svg)](https://capita-api.netlify.app)
 [![CI](https://github.com/brianfunk/cAPIta/actions/workflows/ci.yml/badge.svg)](https://github.com/brianfunk/cAPIta/actions/workflows/ci.yml)
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badge/)
 [![Semver](https://img.shields.io/badge/SemVer-2.0-blue.svg)](http://semver.org/spec/v2.0.0.html)
@@ -12,6 +13,15 @@
 > cAPIta - Capitalization API
 
 A blazing-fast REST API for text transformation. Convert any string to 29 different styles including camelCase, snake_case, kebab-case, and more! Powered by [capstring](https://github.com/brianfunk/capstring).
+
+## Try It Live
+
+**https://capita-api.netlify.app** has a playground that transforms as you type. Or just hit a URL:
+
+- https://capita-api.netlify.app/sponge/hello%20world.txt → `HeLlO WoRlD`
+- https://capita-api.netlify.app/kebab/Hello%20World.json → `{"input":"Hello World","output":"hello-world","cap":"kebab"}`
+- https://capita-api.netlify.app/badge/upper/hello → an SVG badge for your README
+- https://capita-api.netlify.app/spell/helo%20wrld.txt → `hello world`
 
 ## Why cAPIta?
 
@@ -28,10 +38,11 @@ A blazing-fast REST API for text transformation. Convert any string to 29 differ
 ## Quick Start
 
 ```bash
-# Install
-npm install capita
+# Run it (no install needed)
+npx @brianfunk/capita
 
-# Start the server
+# Or clone and start
+npm install
 npm start
 
 # Try it out!
@@ -172,7 +183,7 @@ curl http://localhost:4321/spell/helo%20wrld.json
 GET /badge/:style/:string
 ```
 
-Returns an SVG badge via shields.io. Perfect for README files!
+Returns a shields-style SVG badge, rendered locally with no external calls. Perfect for README files!
 
 ### List Available Styles
 
@@ -194,18 +205,22 @@ Returns all available styles and their count.
 - **Input Limits** - Max 10,000 characters per request
 - **Batch Limits** - Max 100 items per batch request
 - **Chain Limits** - Max 10 transformations per chain
-- **Fetch Timeout** - 5 second timeout on badge requests
 
 ## Development
 
 ```bash
 npm install        # Install dependencies
 npm start          # Start server
+npm run dev        # Run through Netlify Dev (static playground + function)
 npm run demo       # Run interactive demo
 npm test           # Run tests
 npm run lint       # Run linter
 npm run test:coverage # Test with coverage (84%+)
 ```
+
+## Deployment
+
+The site runs on Netlify: `public/` is served statically (the playground) and every other path is redirected to `netlify/functions/api.mjs`, which wraps the Express app. See `netlify.toml`.
 
 ## Contributing
 

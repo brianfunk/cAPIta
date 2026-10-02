@@ -56,7 +56,7 @@ curl http://localhost:4321/styles
 ## Programmatic Usage
 
 ```javascript
-import { createApp } from 'capita';
+import { createApp } from '@brianfunk/capita';
 
 const app = createApp();
 app.listen(3000);
@@ -81,8 +81,10 @@ npm start             # Start server
 
 ## Architecture
 
-- `index.js` - Express server with all routes
-- `createApp()` - Factory function for testability
+- `app.js` - Express app with all routes; `createApp()` factory for testability
+- `index.js` - Server entry (`npm start` / `npx @brianfunk/capita`), listens on PORT
+- `public/index.html` - Static playground served at `/`
+- `netlify/functions/api.mjs` + `netlify.toml` - Netlify hosting (live at https://capita-api.netlify.app)
 - Uses `capstring` package for all transformations
 - Uses `nspell` + `dictionary-en` for spell checking
 

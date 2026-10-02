@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-10-01
+
+### Added
+
+- **Live site** at https://capita-api.netlify.app with a playground at `/` that transforms as you type
+- Netlify deployment (`netlify.toml`, `netlify/functions/api.mjs`) and `npm run dev`
+- `npx @brianfunk/capita` runs the server (new `bin` entry)
+
+### Changed
+
+- **Package renamed to `@brianfunk/capita`** (the unscoped `capita` name on npm belongs to someone else)
+- App factory moved to `app.js`; `index.js` is now the server entry and no longer starts listening on import
+- Badges are rendered locally as SVG instead of proxying shields.io
+- `GET /` now serves the playground instead of plain text
+
 ## [1.0.1] - 2026-02-08
 
 ### Changed

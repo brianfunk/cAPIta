@@ -1,15 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
-import { createApp } from '../index.js';
+import { createApp } from '../app.js';
 
 const app = createApp();
 
 describe('cAPIta API', () => {
   describe('GET /', () => {
-    it('returns cAPIta', async () => {
+    it('serves the playground', async () => {
       const res = await request(app).get('/');
       expect(res.status).toBe(200);
-      expect(res.text).toBe('cAPIta');
+      expect(res.headers['content-type']).toContain('text/html');
+      expect(res.text).toContain('cAPIta');
     });
   });
 
@@ -397,11 +398,26 @@ describe('Badge endpoint', () => {
       expect(res.text).toBe('error - invalid case');
     });
 
-    // Note: Success case skipped as it requires external shields.io service
-    it.skip('returns SVG badge', async () => {
+    it('returns SVG badge rendered locally', async () => {
       const res = await request(app).get('/badge/upper/hello');
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toContain('svg');
+      const svg = res.body.toString();
+      expect(svg).toContain('<svg');
+      expect(svg).toContain('HELLO');
+    });
+
+    it('escapes markup in badge text', async () => {
+      const res = await request(app).get('/badge/same/%3Cb%3Ex%3C%2Fb%3E');
+      expect(res.status).toBe(200);
+      const svg = res.body.toString();
+      expect(svg).not.toContain('<b>');
+      expect(svg).toContain('&lt;b&gt;');
+    });
+
+    it('returns 400 for input too long', async () => {
+      const res = await request(app).get(`/badge/upper/${'a'.repeat(10001)}`);
+      expect(res.status).toBe(400);
     });
   });
 });
