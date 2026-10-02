@@ -4,7 +4,7 @@
  * Run: npm run demo
  */
 
-import { createApp, CASES } from './index.js';
+import { createApp, CASES } from './app.js';
 
 const app = createApp();
 const PORT = 4322; // Use different port for demo

@@ -1,15 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
-import { createApp } from '../index.js';
+import { createApp } from '../app.js';
 
 const app = createApp();
 
 describe('cAPIta API', () => {
   describe('GET /', () => {
-    it('returns cAPIta', async () => {
+    it('serves the playground', async () => {
       const res = await request(app).get('/');
       expect(res.status).toBe(200);
-      expect(res.text).toBe('cAPIta');
+      expect(res.headers['content-type']).toContain('text/html');
+      expect(res.text).toContain('cAPIta');
     });
   });
 
@@ -397,11 +398,26 @@ describe('Badge endpoint', () => {
       expect(res.text).toBe('error - invalid case');
     });
 
-    // Note: Success case skipped as it requires external shields.io service
-    it.skip('returns SVG badge', async () => {
+    it('returns SVG badge rendered locally', async () => {
       const res = await request(app).get('/badge/upper/hello');
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toContain('svg');
+      const svg = res.body.toString();
+      expect(svg).toContain('<svg');
+      expect(svg).toContain('HELLO');
+    });
+
+    it('escapes markup in badge text', async () => {
+      const res = await request(app).get('/badge/same/%3Cb%3Ex%3C%2Fb%3E');
+      expect(res.status).toBe(200);
+      const svg = res.body.toString();
+      expect(svg).not.toContain('<b>');
+      expect(svg).toContain('&lt;b&gt;');
+    });
+
+    it('returns 400 for input too long', async () => {
+      const res = await request(app).get(`/badge/upper/${'a'.repeat(10001)}`);
+      expect(res.status).toBe(400);
     });
   });
 });
@@ -573,6 +589,54 @@ describe('Chain endpoint', () => {
       expect(res.status).toBe(200);
       expect(res.text).toBe('OLLEH');
     });
+  });
+});
+
+describe('CORS', () => {
+  it('allows any origin on GET', async () => {
+    const res = await request(app).get('/upper/hello.json');
+    expect(res.headers['access-control-allow-origin']).toBe('*');
+  });
+
+  it('answers preflight for POST /batch', async () => {
+    const res = await request(app)
+      .options('/batch')
+      .set('Origin', 'https://example.com')
+      .set('Access-Control-Request-Method', 'POST');
+    expect(res.status).toBe(204);
+    expect(res.headers['access-control-allow-methods']).toContain('POST');
+    expect(res.headers['access-control-allow-headers']).toContain('Content-Type');
+  });
+});
+
+describe('Caching', () => {
+  it('marks deterministic transforms as publicly cacheable', async () => {
+    const res = await request(app).get('/kebab/hello%20world.json');
+    expect(res.headers['cache-control']).toContain('public');
+    expect(res.headers['netlify-cdn-cache-control']).toContain('public');
+  });
+
+  it('does not cache random styles', async () => {
+    const res = await request(app).get('/random/hello.json');
+    expect(res.headers['cache-control']).toBe('no-store');
+    expect(res.headers['netlify-cdn-cache-control']).toBeUndefined();
+  });
+
+  it('does not cache chains containing a random style', async () => {
+    const res = await request(app).get('/chain/upper+crazy/hello.json');
+    expect(res.headers['cache-control']).toBe('no-store');
+  });
+
+  it('caches styles, badges, count, lorem and spell', async () => {
+    for (const path of ['/styles', '/badge/upper/hi', '/count/hi', '/lorem/3', '/spell/helo.json']) {
+      const res = await request(app).get(path);
+      expect(res.headers['cache-control'], path).toContain('public');
+    }
+  });
+
+  it('does not cache POST /batch', async () => {
+    const res = await request(app).post('/batch').send({ inputs: ['a'], style: 'upper' });
+    expect(res.headers['cache-control']).toBeUndefined();
   });
 });
 

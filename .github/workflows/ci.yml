@@ -7,20 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18, 20, 22]
+        node: [20, 22, 24]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
-      - name: Clean install dependencies
-        run: |
-          rm -rf node_modules package-lock.json
-          npm install
+          cache: npm
+      # Install from the committed lockfile. Resolving vitest@^4 from scratch
+      # crashes npm 10's resolver, and the lockfile already carries the Linux
+      # rollup binary, so a clean re-resolve is neither needed nor safe.
+      - run: npm ci
       - run: npm run lint
-      - name: Run tests
-        if: matrix.node == 18
-        run: npm test
-      - name: Run tests with coverage
-        if: matrix.node != 18
-        run: npm run test:coverage
+      - run: npm run test:coverage

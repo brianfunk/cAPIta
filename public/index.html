@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cAPIta</title>
+<meta name="description" content="cAPIta: a tiny REST API that capitalizes strings 29 ways. Type a phrase, get every style, copy the URL.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23b5d4ff'/><text x='50' y='68' font-size='52' text-anchor='middle' font-family='monospace' font-weight='bold' fill='%231a2a44'>Aa</text></svg>">
+<style>
+  :root {
+    --bg: #fbfcff;
+    --fg: #1a2233;
+    --muted: #5f6b80;
+    --card: #ffffff;
+    --line: #dde4f0;
+    --accent: #b5d4ff;
+    --accent-ink: #1a2a44;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1420;
+      --fg: #e6ebf5;
+      --muted: #8e9ab3;
+      --card: #171e2e;
+      --line: #2a3448;
+      --accent: #b5d4ff;
+      --accent-ink: #0f1420;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 64px; }
+  pre.logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.15;
+    margin: 0 0 4px;
+    color: var(--fg);
+    overflow-x: auto;
+  }
+  p.tag { margin: 0 0 24px; color: var(--muted); }
+  p.tag a { color: inherit; }
+  .input {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 6px 6px 6px 16px;
+  }
+  .input input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    font-size: 20px;
+    outline: none;
+  }
+  .input button {
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font: inherit;
+    font-weight: 600;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .curl {
+    margin: 12px 0 28px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    word-break: break-all;
+  }
+  .curl a { color: var(--fg); text-decoration: none; border-bottom: 1px dotted var(--muted); }
+  .curl select {
+    font: inherit;
+    font-size: 12px;
+    color: var(--fg);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 2px 6px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .curl a:hover { border-bottom-style: solid; }
+  h2 {
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 28px 0 10px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: border-color .15s, transform .15s;
+    min-width: 0;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card:active { transform: scale(.98); }
+  .card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+  .card .style {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+  .card .style .hint { opacity: 0; transition: opacity .15s; }
+  .card:hover .style .hint { opacity: 1; }
+  .card .out {
+    font-size: 17px;
+    margin-top: 2px;
+    overflow-wrap: anywhere;
+    min-height: 1.5em;
+  }
+  .card .out:empty::after { content: "\00a0"; }
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 14px;
+  }
+  footer code { font-family: var(--mono); font-size: 13px; color: var(--fg); }
+  footer ul { padding-left: 18px; margin: 8px 0; }
+  footer li { margin: 2px 0; }
+  footer a { color: inherit; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--fg);
+    color: var(--bg);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s, transform .2s;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<main>
+  <pre class="logo" aria-label="cAPIta">          _    ____ ___ _
+   ___   / \  |  _ \_ _| |_ __ _
+  / __| / _ \ | |_) | || __/ _` |
+ | (__ / ___ \|  __/| || || (_| |
+  \___/_/   \_\_|  |___|\__\__,_|</pre>
+  <p class="tag">A tiny REST API that capitalizes strings 29 ways. Type something, click a card to copy, or just hit the URL. The page link carries your phrase, so share it. Powered by <a href="https://github.com/brianfunk/capstring">capstring</a>.</p>
+
+  <div class="input">
+    <input id="text" type="text" value="hello world" placeholder="type a phrase" autocomplete="off" autofocus>
+    <button id="spell" type="button" title="Run the input through the spell checker">spell check</button>
+  </div>
+  <div class="curl"><span id="curl"></span><select id="ext" aria-label="Output format"><option>json</option><option>txt</option><option>html</option><option>xml</option><option>yaml</option><option>csv</option><option>jsonp</option></select></div>
+
+  <div id="groups"></div>
+
+  <footer>
+    <strong>Endpoints</strong>
+    <ul>
+      <li><code>GET /:style/:text</code> or <code>/:style/:text.json|txt|html|xml|yaml|csv|jsonp</code></li>
+      <li><code>GET /chain/:style+:style/:text</code> apply several styles in order</li>
+      <li><code>POST /batch</code> <code>{"inputs":[...],"style":"kebab"}</code> up to 100 strings</li>
+      <li><code>GET /spell/:text</code> spell-corrected text, no API key</li>
+      <li><code>GET /badge/:style/:text</code> SVG badge for your README</li>
+      <li><code>GET /count/:text</code> words and characters, <code>GET /lorem/:n</code> placeholder text</li>
+      <li><code>GET /styles</code> every style name</li>
+    </ul>
+    Self-host with <code>npx @brianfunk/capita</code>. Source on <a href="https://github.com/brianfunk/cAPIta">GitHub</a>. MIT.
+  </footer>
+</main>
+<div class="toast" id="toast">copied</div>
+
+<script>
+(() => {
+  const GROUPS = {
+    'Case': ['upper', 'lower', 'title', 'sentence', 'proper', 'swap', 'same'],
+    'Code': ['camel', 'pascal', 'snake', 'kebab', 'slug', 'constant', 'python', 'dot', 'path', 'train'],
+    'Fun': ['leet', 'reverse', 'sponge', 'mock', 'alternate', 'crazy', 'random', 'hashtag', 'acronym', 'rot13', 'flip', 'none']
+  };
+
+  const input = document.getElementById('text');
+  const groupsEl = document.getElementById('groups');
+  const curlEl = document.getElementById('curl');
+  const extEl = document.getElementById('ext');
+  const toast = document.getElementById('toast');
+  const cards = {};
+  let selected = 'title';
+  let timer = null;
+  let seq = 0;
+
+  const base = location.origin;
+
+  const buildCards = (styles) => {
+    const known = new Set(Object.values(GROUPS).flat());
+    const extra = styles.filter((s) => !known.has(s));
+    const groups = { ...GROUPS };
+    if (extra.length) groups['More'] = extra;
+
+    for (const [name, list] of Object.entries(groups)) {
+      const present = list.filter((s) => styles.includes(s));
+      if (!present.length) continue;
+      const h = document.createElement('h2');
+      h.textContent = `${name} (${present.length})`;
+      groupsEl.appendChild(h);
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+      for (const style of present) {
+        const card = document.createElement('div');
+        card.className = 'card' + (style === selected ? ' selected' : '');
+        card.dataset.style = style;
+        card.innerHTML = `<div class="style"><span>${style}</span><span class="hint">click to copy</span></div><div class="out"></div>`;
+        card.addEventListener('click', () => select(style, true));
+        grid.appendChild(card);
+        cards[style] = card;
+      }
+      groupsEl.appendChild(grid);
+    }
+  };
+
+  const showToast = (msg) => {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1200);
+  };
+
+  const encode = (s) => encodeURIComponent(s);
+
+  const readHash = () => {
+    try {
+      const raw = location.hash.slice(1);
+      if (!raw) return null;
+      const [text, style] = raw.split('|').map((v) => decodeURIComponent(v));
+      return { text, style };
+    } catch {
+      return null;
+    }
+  };
+
+  const writeHash = () => {
+    const text = input.value;
+    const hash = text ? `#${encode(text)}|${selected}` : '';
+    history.replaceState(null, '', `${location.pathname}${hash}`);
+  };
+
+  const updateCurl = () => {
+    const text = input.value;
+    const ext = extEl.value;
+    const query = ext === 'jsonp' ? '?callback=cb' : '';
+    const url = `${base}/${selected}/${encode(text)}.${ext}${query}`;
+    curlEl.innerHTML = `curl <a href="${url}" target="_blank" rel="noopener">${url}</a>`;
+    writeHash();
+  };
+
+  const select = async (style, copy) => {
+    selected = style;
+    for (const [s, c] of Object.entries(cards)) c.classList.toggle('selected', s === style);
+    updateCurl();
+    if (copy) {
+      const out = cards[style].querySelector('.out').textContent;
+      try {
+        await navigator.clipboard.writeText(out);
+        showToast(`copied "${out}"`);
+      } catch {
+        showToast('copy failed');
+      }
+    }
+  };
+
+  const transform = async () => {
+    const text = input.value;
+    const mine = ++seq;
+    updateCurl();
+    if (!text) {
+      for (const c of Object.values(cards)) c.querySelector('.out').textContent = '';
+      return;
+    }
+    const styles = Object.keys(cards);
+    await Promise.all(styles.map(async (style) => {
+      try {
+        const r = await fetch(`${base}/${style}/${encode(text)}.json`);
+        const data = await r.json();
+        if (mine !== seq) return;
+        cards[style].querySelector('.out').textContent = data.output ?? '';
+      } catch {
+        if (mine !== seq) return;
+        cards[style].querySelector('.out').textContent = '';
+      }
+    }));
+  };
+
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(transform, 180);
+  });
+
+  extEl.addEventListener('change', updateCurl);
+
+  document.getElementById('spell').addEventListener('click', async () => {
+    const text = input.value.trim();
+    if (!text) return;
+    try {
+      const r = await fetch(`${base}/spell/${encode(text)}.json`);
+      const data = await r.json();
+      if (data.output && data.output !== text) {
+        input.value = data.output;
+        showToast(`"${text}" → "${data.output}"`);
+        transform();
+      } else {
+        showToast('looks right already');
+      }
+    } catch {
+      showToast('spell check failed');
+    }
+  });
+
+  const fromHash = readHash();
+  if (fromHash?.text) input.value = fromHash.text;
+
+  const start = (styles) => {
+    if (fromHash?.style && styles.includes(fromHash.style)) selected = fromHash.style;
+    buildCards(styles);
+    transform();
+  };
+
+  fetch(`${base}/styles`)
+    .then((r) => r.json())
+    .then((d) => start(d.styles))
+    .catch(() => start(Object.values(GROUPS).flat()));
+})();
+</script>
+</body>
+</html>
